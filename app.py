@@ -34,7 +34,8 @@ st.write("Analyze any movie review — get its **sentiment**, **dominant emotion
 # ================================
 # Load Preprocessed Dataset
 # ================================
-data = pd.read_csv("IMDB Dataset.csv")
+url = "https://raw.githubusercontent.com/RohitInfinite/NLP-Sentiment-Emotion-Analyzer/main/IMDB%20Dataset.csv"
+data = pd.read_csv(url)
 data = data.sample(5000, random_state=42)
 
 # Prepare training data
