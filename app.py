@@ -10,7 +10,6 @@ Original file is located at
 # ================================
 # app.py - Final NLP Project Dashboard
 # ================================
-
 import streamlit as st
 import pandas as pd
 from nrclex import NRCLex
@@ -22,6 +21,8 @@ from wordcloud import WordCloud
 import nltk
 
 # Download necessary NLTK data (only once)
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 nltk.download('punkt', quiet=True)
 
 # ================================
