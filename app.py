@@ -34,9 +34,18 @@ st.write("Analyze any movie review — get its **sentiment**, **dominant emotion
 # ================================
 # Load Preprocessed Dataset
 # ================================
+import gdown
+import os
+
 file_id = "1h0DOjCgDZAYulDYwiKimhlZ5uvqqKF-G"
-url = f"https://drive.google.com/uc?export=download&id={file_id}"
-data = pd.read_csv(url)
+url = f"https://drive.google.com/uc?id={file_id}"
+
+# Download file if not already present
+if not os.path.exists("IMDB_Dataset.csv"):
+    gdown.download(url, "IMDB_Dataset.csv", quiet=False)
+
+data = pd.read_csv("IMDB_Dataset.csv", on_bad_lines='skip')
+
 data = data.sample(5000, random_state=42)
 
 # Prepare training data
