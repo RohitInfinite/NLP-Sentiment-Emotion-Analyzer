@@ -37,7 +37,7 @@ st.write("Analyze any movie review — get its **sentiment**, **dominant emotion
 import gdown
 import os
 
-file_id = "1h0DOjCgDZAYulDYwiKimhlZ5uvqqKF-G"
+file_id = "1c-6qg1kGsuDrNXS9iCH4L1ryqiARMAUM"
 url = f"https://drive.google.com/uc?id={file_id}"
 
 # Download file if not already present
