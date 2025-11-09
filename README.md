@@ -12,3 +12,7 @@ A Natural Language Processing project that analyzes IMDb reviews to detect senti
 1. Clone the repository
 2. Run `pip install -r requirements.txt`
 3. Execute `streamlit run app.py`
+4. for IMDB dataset : "https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews"
+
+#APP Link
+https://nlp-sentiment-emotion-analyzer-yxntkx8fyncph7zvyqwasa.streamlit.app/
