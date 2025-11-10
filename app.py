@@ -72,11 +72,9 @@ def set_background(image_file):
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
-    st.markdown('<div class="main-block">', unsafe_allow_html=True)
 
 # Call the function (make sure image name matches exactly)
 set_background("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")
-st.markdown("</div>", unsafe_allow_html=True)
 
 # Download necessary NLTK data (only once)
 nltk.download('punkt')
