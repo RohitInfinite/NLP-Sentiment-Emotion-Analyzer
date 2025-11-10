@@ -97,7 +97,10 @@ if st.button("Analyze Review"):
     else:
         user_vector = tfidf.transform([review])
         sentiment = model.predict(user_vector)[0]
-
+        
+        nltk.download('punkt')
+        nltk.download('punkt_tab')
+        
         tokens = word_tokenize(review)
         clean_text = " ".join(tokens)
         emo = NRCLex(clean_text)
