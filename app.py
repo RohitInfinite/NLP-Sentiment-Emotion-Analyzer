@@ -119,48 +119,55 @@ if st.button("Analyze Review"):
             st.bar_chart(emo_df.set_index("Emotion"))
 
                 # ================================
-        st.subheader("🍿 Movie & TV Recommendations Based on Your Mood")
+                # ================================
+        # 🎬 Movie Recommendations (TMDB API + Posters)
+        # ================================
+        import requests
 
-        recommendations = {
-            "positive": [
-                {"title": "Interstellar", "year": 2014, "rating": 8.7, "genre": "Sci-Fi, Drama"},
-                {"title": "Forrest Gump", "year": 1994, "rating": 8.8, "genre": "Drama"},
-                {"title": "Coco", "year": 2017, "rating": 8.4, "genre": "Animation, Family"},
-                {"title": "3 Idiots", "year": 2009, "rating": 8.4, "genre": "Comedy, Drama"},
-                {"title": "Zindagi Na Milegi Dobara", "year": 2011, "rating": 8.2, "genre": "Adventure, Drama"},
-                {"title": "The Pursuit of Happyness", "year": 2006, "rating": 8.0, "genre": "Drama"},
-                {"title": "Inside Out", "year": 2015, "rating": 8.1, "genre": "Animation, Family"},
-                {"title": "Good Will Hunting", "year": 1997, "rating": 8.3, "genre": "Drama"},
-                # TV Shows
-                {"title": "Ted Lasso", "year": "2020–", "rating": 8.8, "genre": "Comedy"},
-                {"title": "Modern Family", "year": "2009–2020", "rating": 8.5, "genre": "Comedy"}
-            ],
-            "negative": [
-                {"title": "Joker", "year": 2019, "rating": 8.4, "genre": "Crime, Drama"},
-                {"title": "Fight Club", "year": 1999, "rating": 8.8, "genre": "Drama"},
-                {"title": "The Dark Knight", "year": 2008, "rating": 9.0, "genre": "Action, Crime"},
-                {"title": "The Whale", "year": 2022, "rating": 7.7, "genre": "Drama"},
-                {"title": "Requiem for a Dream", "year": 2000, "rating": 8.3, "genre": "Drama"},
-                {"title": "Schindler's List", "year": 1993, "rating": 9.0, "genre": "Drama, History"},
-                # TV Shows
-                {"title": "Breaking Bad", "year": "2008–2013", "rating": 9.5, "genre": "Crime, Drama"},
-                {"title": "Mr. Robot", "year": "2015–2019", "rating": 8.5, "genre": "Drama, Thriller"}
-            ],
-            "neutral": [
-                {"title": "Inception", "year": 2010, "rating": 8.8, "genre": "Sci-Fi"},
-                {"title": "The Matrix", "year": 1999, "rating": 8.7, "genre": "Sci-Fi"},
-                {"title": "Arrival", "year": 2016, "rating": 7.9, "genre": "Sci-Fi, Drama"},
-                {"title": "The Prestige", "year": 2006, "rating": 8.5, "genre": "Mystery, Thriller"},
-                {"title": "Her", "year": 2013, "rating": 8.0, "genre": "Romance, Sci-Fi"},
-                # TV Shows
-                {"title": "Dark", "year": "2017–2020", "rating": 8.7, "genre": "Sci-Fi, Mystery"},
-                {"title": "Black Mirror", "year": "2011–", "rating": 8.7, "genre": "Sci-Fi, Anthology"}
-            ]
+        st.subheader("🍿 Movie Recommendations Based on Your Mood")
+
+        TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
+
+        # Sentiment → keyword mapping
+        query_map = {
+            "positive": "feel good",
+            "negative": "emotional drama",
+            "neutral": "thought provoking"
         }
 
-        recs = recommendations.get(sentiment.lower(), recommendations["neutral"])
-        for m in recs:
-            st.markdown(f"🎞 **{m['title']}** ({m['year']})  \n⭐ *Rating:* {m['rating']}  \n🎭 *Genre:* {m['genre']}")
+        query = query_map.get(sentiment.lower(), "movie")
+
+        # Search movies from TMDB
+        search_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={query}"
+        response = requests.get(search_url).json()
+        movies = response.get("results", [])[:8]  # take top 8 movies
+
+        if not movies:
+            st.write("No recommendations available right now 😅")
+        else:
+            cols = st.columns(4)
+            for i, movie in enumerate(movies):
+                with cols[i % 4]:
+
+                    poster = movie.get("poster_path")
+                    poster_url = f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+
+                    title = movie.get("title", "Unknown Title")
+                    year = movie.get("release_date", "")[:4]
+                    rating = movie.get("vote_average", "N/A")
+                    movie_id = movie.get("id")
+
+                    # Fetch genres for each movie
+                    details_url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}"
+                    details = requests.get(details_url).json()
+                    genres = ", ".join([g['name'] for g in details.get("genres", [])])
+
+                    if poster_url:
+                        st.image(poster_url, use_column_width=True)
+
+                    st.markdown(f"**{title} ({year})**")
+                    st.markdown(f"⭐ **Rating:** {rating}")
+                    st.markdown(f"🎭 **Genres:** {genres}")
 
 # ---------- WordCloud ----------
 st.subheader("🌈 WordCloud of Positive vs Negative Reviews")
