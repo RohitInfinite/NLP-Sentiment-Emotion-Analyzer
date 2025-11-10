@@ -23,29 +23,49 @@ def set_background(image_file):
         img_data = f.read()
     encoded = base64.b64encode(img_data).decode()
 
-    st.markdown(f"""
-        <style>
-        .stApp {{
-            background: url("data:image/jpg;base64,{encoded}") no-repeat center center fixed;
-            background-size: cover;
-        }}
-        .glass-box {{
-            background: rgba(0, 0, 0, 0.58);
-            backdrop-filter: blur(13px);
-            -webkit-backdrop-filter: blur(13px);
-            border-radius: 25px;
-            padding: 45px 60px;
-            margin: 50px auto;
-            max-width: 1050px;
-            box-shadow: 0 12px 45px rgba(0,0,0,0.55);
-        }}
-        h1, h2, h3, p, label, .css-17eq0hr, .css-16idsys {{
-            color: white !important;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
-        }}
-        </style>
-    """, unsafe_allow_html=True)
+    st.markdown("""
+    <style>
+    .glass-box {
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 18px;
+        padding: 40px 50px;
+        margin: 50px auto;
+        max-width: 1100px;
+        box-shadow: 0 8px 50px rgba(0,0,0,0.7);
+    }
 
+    h1, h2, h3, p, label, .stMarkdown {
+        color: #ffffff !important;
+        text-shadow: 1px 1px 5px rgba(0,0,0,0.9);
+    }
+
+    .stTextInput textarea, .stTextArea textarea {
+        background: rgba(255,255,255,0.15) !important;
+        color: white !important;
+        border-radius: 10px !important;
+        border: 1px solid rgba(255,255,255,0.3) !important;
+    }
+
+    .stButton>button {
+        background-color: #ff4747 !important;
+        color: white !important;
+        border-radius: 10px !important;
+        font-weight: 600;
+        padding: 10px 22px;
+        border: none;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        background-color: #ff7474 !important;
+        transform: scale(1.05);
+    }
+    </style>
+
+    <div class="glass-box">
+""", unsafe_allow_html=True)
+    
 set_background("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")  # << CHANGE ONLY IF YOUR IMAGE NAME IS DIFFERENT
 
 # ============================
