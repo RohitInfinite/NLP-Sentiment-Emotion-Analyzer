@@ -179,7 +179,7 @@ if st.button("Analyze Review"):
                 st.markdown(f"🎞️ **{movie}**")
 
         st.success("Hope these movies match your mood! 🍿")
-
+st.markdown("</div>", unsafe_allow_html=True)
 # ================================
 # WordCloud Visualization
 # ================================
@@ -198,4 +198,3 @@ axes[1].set_title('Negative Reviews')
 axes[1].axis('off')
 
 st.pyplot(fig)
-st.markdown("</div>", unsafe_allow_html=True)
