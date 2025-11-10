@@ -20,6 +20,35 @@ import seaborn as sns
 from wordcloud import WordCloud
 import nltk
 
+import base64
+
+# Function to set custom background
+def set_background(image_file):
+    with open(image_file, "rb") as f:
+        data = f.read()
+    b64 = base64.b64encode(data).decode()
+    css = f"""
+    <style>
+    .stApp {{
+        background-image: url("data:image/jpg;base64,{b64}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }}
+    /* Add a light dark overlay for better text visibility */
+    .stApp > .main {{
+        background-color: rgba(0,0,0,0.45);
+        padding: 1rem;
+        border-radius: 8px;
+    }}
+    </style>
+    """
+    st.markdown(css, unsafe_allow_html=True)
+
+# Call the function (make sure filename matches exactly)
+set_background("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")
+
 # Download necessary NLTK data (only once)
 nltk.download('punkt')
 nltk.download('punkt_tab')
