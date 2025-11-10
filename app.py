@@ -28,52 +28,21 @@ def set_background(image_file):
         data = f.read()
     b64 = base64.b64encode(data).decode()
 
-    css = f"""
-    <style>
-    /* Background image */
-    .stApp {{
-        background-image: url("data:image/jpg;base64,{b64}");
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-
-    /* Frosted glass container for content */
-    .main-block {{
-        background: rgba(0, 0, 0, 0.55);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin: 1rem auto;
-        max-width: 900px;
-        box-shadow: 0 4px 25px rgba(0,0,0,0.3);
-        color: white;
-    }}
-
-    /* Headings and text styling */
-    h1, h2, h3, p, label {{
-        color: #ffffff !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-    }}
-
-    /* Buttons */
-    button[kind="primary"] {{
-        background-color: #ff4b4b;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        transition: 0.3s;
-    }}
-    button[kind="primary"]:hover {{
-        background-color: #ff7878;
-    }}
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-
-# Call the function (make sure image name matches exactly)
+    st.markdown(f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{b64}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }}
+        h1, h2, h3, p, label {{
+            color: #ffffff !important;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+        }}
+        </style>
+    """, unsafe_allow_html=True)
+# Call Background Function
 set_background("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")
 
 # Download necessary NLTK data (only once)
@@ -91,16 +60,14 @@ st.set_page_config(page_title="Sentiment & Emotion Analyzer", layout="centered")
 st.markdown("""
     <style>
     .glass-box {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border-radius: 20px;
-        padding: 30px;
-        margin-top: 40px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-    h1, h2, h3, p {
-        color: white !important;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-radius: 18px;
+        padding: 40px 50px;
+        margin: 50px auto;
+        max-width: 1050px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.6);
     }
     </style>
     <div class="glass-box">
