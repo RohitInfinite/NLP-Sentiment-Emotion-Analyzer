@@ -1,164 +1,141 @@
 import streamlit as st
 import pandas as pd
+import base64
+import os
+import gdown
+import nltk
 from nrclex import NRCLex
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
-import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import nltk
-import gdown
-import os
-import base64
+import matplotlib.pyplot as plt
 
-# -----------------------------------------
-# PAGE SETTINGS (ye sabse upar hona hi chahiye)
-# -----------------------------------------
-st.set_page_config(page_title="Sentiment & Emotion Analyzer", layout="wide")
+# ============================
+# MUST BE FIRST
+# ============================
+st.set_page_config(page_title="Sentiment & Emotion Analyzer", layout="centered")
 
-# -----------------------------------------
-# BACKGROUND IMAGE
-# -----------------------------------------
-def set_bg(image_file):
+# ============================
+# Background Image Function
+# ============================
+def set_background(image_file):
     with open(image_file, "rb") as f:
-        data = f.read()
-    encoded = base64.b64encode(data).decode()
+        img_data = f.read()
+    encoded = base64.b64encode(img_data).decode()
+
     st.markdown(f"""
         <style>
         .stApp {{
-            background-image: url("data:image/jpg;base64,{encoded}");
+            background: url("data:image/jpg;base64,{encoded}") no-repeat center center fixed;
             background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+        }}
+        .glass-box {{
+            background: rgba(0, 0, 0, 0.58);
+            backdrop-filter: blur(13px);
+            -webkit-backdrop-filter: blur(13px);
+            border-radius: 25px;
+            padding: 45px 60px;
+            margin: 50px auto;
+            max-width: 1050px;
+            box-shadow: 0 12px 45px rgba(0,0,0,0.55);
+        }}
+        h1, h2, h3, p, label, .css-17eq0hr, .css-16idsys {{
+            color: white !important;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.9);
         }}
         </style>
     """, unsafe_allow_html=True)
 
-set_bg("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")  # <<======= CHANGE THIS TO YOUR IMAGE NAME
+set_background("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")  # << CHANGE ONLY IF YOUR IMAGE NAME IS DIFFERENT
 
-# -----------------------------------------
-# GLOBAL GLASS STYLES + CARD SYSTEM
-# -----------------------------------------
-st.markdown("""
-<style>
-.hero {
-    background: rgba(0,0,0,0.35);
-    backdrop-filter: blur(12px);
-    border-radius: 16px;
-    padding: 40px;
-    margin-top: 40px;
-    text-align: center;
-}
-.card {
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(14px);
-    border-radius: 16px;
-    padding: 30px;
-    margin-top: 30px;
-}
-h1, h2, h3, p, label {
-    color: #ffffff !important;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
-}
-</style>
-""", unsafe_allow_html=True)
+# ============================
+# Glass Container Start
+# ============================
+st.markdown("<div class='glass-box'>", unsafe_allow_html=True)
 
-# -----------------------------------------
-# HERO SECTION (top intro block)
-# -----------------------------------------
-st.markdown("<div class='hero'>", unsafe_allow_html=True)
+# ============================
+# Title
+# ============================
 st.title("🎬 IMDb Movie Review - NLP Sentiment & Emotion Analyzer")
-st.write("Analyze any movie review to reveal its **mood**, **emotions**, and get fun **movie recommendations** 🎭")
-st.markdown("</div>", unsafe_allow_html=True)
+st.write("Analyze any movie review and discover its **sentiment**, **dominant emotion**, and **visual insights**!")
 
-# -----------------------------------------
-# DOWNLOAD + PREPARE DATA
-# -----------------------------------------
+# ============================
+# Download Required NLTK
+# ============================
+nltk.download('punkt', quiet=True)
+
+# ============================
+# Dataset Load (Google Drive Auto Download)
+# ============================
 file_id = "1c-6qg1kGsuDrNXS9iCH4L1ryqiARMAUM"
 url = f"https://drive.google.com/uc?id={file_id}"
 
 if not os.path.exists("IMDB_Dataset.csv"):
     gdown.download(url, "IMDB_Dataset.csv", quiet=False)
 
-data = pd.read_csv("IMDB_Dataset.csv", on_bad_lines='skip')
-data = data.sample(5000, random_state=42)
+data = pd.read_csv("IMDB_Dataset.csv", on_bad_lines='skip').sample(5000, random_state=42)
 
 X = data['review']
 y = data['sentiment']
 
-tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1, 2))
+tfidf = TfidfVectorizer(max_features=5000, ngram_range=(1,2))
 X_tfidf = tfidf.fit_transform(X)
 
 model = LogisticRegression(max_iter=200)
 model.fit(X_tfidf, y)
 
-# -----------------------------------------
-# REVIEW INPUT CARD
-# -----------------------------------------
-st.markdown("<div class='card'>", unsafe_allow_html=True)
-user_input = st.text_area("✍️ Enter a movie review:", height=150)
-if st.button("Analyze Review"):
-    if user_input.strip():
-        user_tfidf = tfidf.transform([user_input])
-        sentiment = model.predict(user_tfidf)[0]
+# ============================
+# Input Area
+# ============================
+review = st.text_area("✍️ Enter a movie review:", height=150)
 
-        emo = NRCLex(user_input)
+if st.button("Analyze Review"):
+    if review.strip() == "":
+        st.warning("Please enter a review.")
+    else:
+        sentiment = model.predict(tfidf.transform([review]))[0]
+
+        emo = NRCLex(review)
         scores = emo.raw_emotion_scores
-        dominant_emotion = max(scores.items(), key=lambda x: x[1])[0] if scores else "neutral"
+        dominant = max(scores.items(), key=lambda x: x[1])[0] if scores else "neutral"
 
         st.subheader("🧠 Analysis Result")
         st.write(f"**Sentiment:** {sentiment.capitalize()}")
-        st.write(f"**Dominant Emotion:** {dominant_emotion.capitalize()}")
+        st.write(f"**Dominant Emotion:** {dominant.capitalize()}")
 
-        if sentiment == "positive":
-            st.balloons()
-        elif sentiment == "negative":
-            st.snow()
+        if scores:
+            st.subheader("🎭 Emotion Breakdown")
+            emo_df = pd.DataFrame(scores.items(), columns=['Emotion', 'Score'])
+            emo_df = emo_df.sort_values(by='Score', ascending=False)
+            st.bar_chart(emo_df.set_index('Emotion'))
 
-st.markdown("</div>", unsafe_allow_html=True)
+        # Movie Recommendations
+        st.subheader("🍿 Movie Recommendations Based on Mood")
+        movies = {
+            "positive": ["The Pursuit of Happyness", "Forrest Gump", "Interstellar", "Inside Out", "Coco", "La La Land", "3 Idiots", "Zindagi Na Milegi Dobara"],
+            "negative": ["Joker", "The Green Mile", "The Whale", "Grave of the Fireflies", "Fight Club", "Manchester by the Sea", "Requiem for a Dream"],
+            "neutral": ["Inception", "Tenet", "Arrival", "The Matrix", "The Prestige", "Source Code", "Her"]
+        }
+        for m in movies.get(sentiment.lower(), movies["neutral"]):
+            st.markdown(f"🎞️ **{m}**")
 
-# -----------------------------------------
-# EMOTION GRAPH CARD
-# -----------------------------------------
-if user_input.strip():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("🎭 Emotion Breakdown")
-    emo_df = pd.DataFrame(scores.items(), columns=['Emotion', 'Score']).sort_values(by='Score', ascending=False)
-    st.bar_chart(emo_df.set_index('Emotion'))
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.success("Enjoy watching 🎥")
 
-# -----------------------------------------
-# MOVIE RECOMMENDATION CARD
-# -----------------------------------------
-if user_input.strip():
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("🍿 Movie Recommendations (Based on Mood)")
-
-    recs = {
-        "positive": ["The Pursuit of Happyness", "Forrest Gump", "Interstellar", "Coco", "La La Land", "3 Idiots", "ZNMD"],
-        "negative": ["Joker", "The Green Mile", "Fight Club", "The Whale", "Requiem for a Dream", "Manchester by the Sea"],
-        "neutral": ["Inception", "The Prestige", "Arrival", "Her", "The Matrix", "Source Code"]
-    }
-
-    for movie in recs.get(sentiment, recs["neutral"]):
-        st.write(f"🎞️ {movie}")
-
-    st.success("Hope these match your vibe! 🍿✨")
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# -----------------------------------------
-# WORDCLOUD CARD
-# -----------------------------------------
-st.markdown("<div class='card'>", unsafe_allow_html=True)
+# ============================
+# WordCloud
+# ============================
 st.subheader("🌈 WordCloud of Positive vs Negative Reviews")
+pos_text = " ".join(data[data['sentiment']=="positive"]['review'])
+neg_text = " ".join(data[data['sentiment']=="negative"]['review'])
 
-pos_text = " ".join(data[data['sentiment'] == 'positive']['review'])
-neg_text = " ".join(data[data['sentiment'] == 'negative']['review'])
-
-fig, ax = plt.subplots(1, 2, figsize=(14, 6))
-ax[0].imshow(WordCloud(background_color="white", colormap="Greens").generate(pos_text))
+fig, ax = plt.subplots(1,2, figsize=(13,5))
+ax[0].imshow(WordCloud(background_color='white', colormap='Greens').generate(pos_text))
 ax[0].set_title("Positive Reviews"); ax[0].axis("off")
-ax[1].imshow(WordCloud(background_color="white", colormap="Reds").generate(neg_text))
+ax[1].imshow(WordCloud(background_color='white', colormap='Reds').generate(neg_text))
 ax[1].set_title("Negative Reviews"); ax[1].axis("off")
 st.pyplot(fig)
 
+# ============================
+# Close Glass Container
+# ============================
 st.markdown("</div>", unsafe_allow_html=True)
