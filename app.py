@@ -120,11 +120,10 @@ if st.button("Analyze Review"):
 
                 # ================================
                 # ================================
+                # ================================
         # 🎬 Movie Recommendations (TMDB API + Posters)
         # ================================
-        import requests
-
-       st.subheader("🍿 Movie & TV Show Recommendations For You")
+        st.subheader("🍿 Movie & TV Show Recommendations For You")
 
 # NEW curated recommendation list
 recommendations = {
@@ -267,6 +266,7 @@ for i, m in enumerate(items):
         st.markdown(f"**{m['title']}**")
         st.write(f"⭐ Rating: {m['rating']}")
         st.write(f"🎭 Genres: {m['genres']}")
+
 
 # ---------- WordCloud ----------
 st.subheader("🌈 WordCloud of Positive vs Negative Reviews")
