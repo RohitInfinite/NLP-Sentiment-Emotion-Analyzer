@@ -123,67 +123,82 @@ if st.button("Analyze Review"):
 
                 # ================================
                 # ================================
-        # 🎬 Movie & TV Show Recommendations (Premium curated list)
+        # ================================
+        # 🎬 Curated Premium Recommendations (Fixed List + TMDB Posters)
         # ================================
         import requests
-        def fetch_recommendations(category):
-            query_map = {
-                "positive": "feel+good",
-                "negative": "sad+emotional+dark",
-                "neutral": "mind+bending+intelligent"
+
+        TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
+
+        # Curated lists (Best choices)
+        curated_lists = {
+            "positive": [
+                "Interstellar", "Whiplash", "3 Idiots", "Forrest Gump",
+                "The Pursuit of Happyness", "Coco", "Zindagi Na Milegi Dobara",
+                "La La Land", "Soul", "Good Will Hunting",
+                "The Good Place", "The Secret Life of Walter Mitty",
+                "Inside Out", "The Shawshank Redemption", "Ratatouille", "Life of Pi"
+            ],
+            "negative": [
+                "Joker", "Requiem for a Dream", "The Whale", "Manchester by the Sea",
+                "Grave of the Fireflies", "A Silent Voice", "Black Swan",
+                "BoJack Horseman", "Eternal Sunshine of the Spotless Mind",
+                "Taxi Driver", "Blue Valentine", "Fight Club",
+                "Melancholia", "The Green Mile", "The Pianist", "Schindler's List"
+            ],
+            "neutral": [
+                "Inception", "The Matrix", "Tenet", "Arrival",
+                "The Prestige", "Her", "Blade Runner 2049",
+                "Dark", "Black Mirror", "Mr. Robot",
+                "Source Code", "Gone Girl", "Interstellar", 
+                "Shutter Island", "No Country for Old Men", "Dune"
+            ]
+        }
+
+        def fetch_tmdb_data(title):
+            """Search TMDB and return proper poster + metadata"""
+            search_url = f"https://api.themoviedb.org/3/search/multi?api_key={TMDB_API_KEY}&query={title}"
+            response = requests.get(search_url).json()
+            results = response.get("results", [])
+    
+            if not results:
+                return None
+    
+            item = results[0]  # Best match
+            poster = f"https://image.tmdb.org/t/p/w500{item['poster_path']}" if item.get("poster_path") else None
+            rating = item.get("vote_average", "N/A")
+    
+            # Get year
+            date = item.get("release_date") or item.get("first_air_date") or ""
+            year = date.split("-")[0] if date else "N/A"
+    
+            # Get genres (extra polish)
+            genre_url = f"https://api.themoviedb.org/3/{item['media_type']}/{item['id']}?api_key={TMDB_API_KEY}&language=en-US"
+            genre_res = requests.get(genre_url).json()
+            genres = ", ".join([g["name"] for g in genre_res.get("genres", [])])
+    
+            return {
+                "title": f"{title} ({year})",
+                "poster": poster,
+                "rating": round(rating, 1),
+                "genres": genres or "N/A"
             }
 
-            query = query_map.get(category, "mind+bending")
-            api_key = st.secrets["TMDB_API_KEY"]
+        # Display Section
+        st.subheader("🍿 Recommended Movies & TV Shows For Your Mood")
 
-            url = f"https://api.themoviedb.org/3/search/multi?api_key={api_key}&query={query}&language=en-US"
-            response = requests.get(url).json()
-
-            results = response.get("results", [])[:16]  # Top 16 items
-
-            final_items = []
-            for item in results:
-                title = item.get("title") or item.get("name")
-                poster_path = item.get("poster_path")
-                poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
-                rating = item.get("vote_average", None)
-                try:
-                    rating = round(float(rating), 1)
-                except:
-                    rating = "N/A"
-                release_date = item.get("release_date") or item.get("first_air_date") or "N/A"
-                year = release_date.split("-")[0]
-                media_type = item.get("media_type", "").capitalize()
-
-                # Fetch genre names (optional but looks premium)
-                genre_url = f"https://api.themoviedb.org/3/{item['media_type']}/{item['id']}?api_key={api_key}&language=en-US"
-                genre_res = requests.get(genre_url).json()
-                genres = ", ".join([g["name"] for g in genre_res.get("genres", [])])
-
-                final_items.append({
-                    "title": f"{title} ({year}) [{media_type}]",
-                    "poster": poster,
-                    "rating": rating,
-                    "genres": genres
-                })
-
-            return final_items
-
-
-        # Display Recommendations Section
-        st.subheader("🍿 Movie & TV Show Recommendations For You")
-
-        items = fetch_recommendations(sentiment.lower())
+        selected_list = curated_lists.get(sentiment.lower(), curated_lists["neutral"])
+        items = [fetch_tmdb_data(title) for title in selected_list]
+        items = [i for i in items if i]  # remove None results
 
         cols = st.columns(4)
-        for i, m in enumerate(items):
+        for i, m in enumerate(items[:16]):  # show only 16
             with cols[i % 4]:
                 if m["poster"]:
                     st.image(m["poster"], use_column_width=True)
                 st.markdown(f"**{m['title']}**")
-                st.write(f"⭐ Rating: {m['rating']}")
-                st.write(f"🎭 Genres: {m['genres']}")
-
+                st.write(f"⭐ {m['rating']}")
+                st.write(f"🎭 {m['genres']}")
 
 # ---------- WordCloud ----------
 st.subheader("🌈 WordCloud of Positive vs Negative Reviews")
