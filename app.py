@@ -122,48 +122,62 @@ if st.button("Analyze Review"):
                 # ================================
         # 🎬 Movie & TV Show Recommendations (Premium curated list)
         # ================================
-        st.subheader("🍿 Movie & TV Show Recommendations For You")
+        import requests
 
-        recommendations = {
-            "positive": [
-                {"title": "Interstellar (2014)", "poster": "https://m.media-amazon.com/images/I/71niXI3lxlL._AC_SY550_.jpg", "rating": "8.7", "genres": "Adventure, Drama, Sci-Fi"},
-                {"title": "Whiplash (2014)", "poster": "https://m.media-amazon.com/images/I/81p+xe8cbnL._AC_SY550_.jpg", "rating": "8.5", "genres": "Drama, Music"},
-                {"title": "3 Idiots (2009)", "poster": "https://m.media-amazon.com/images/I/71i+6k8EGFL._AC_SY679_.jpg", "rating": "8.4", "genres": "Comedy, Drama"},
-                {"title": "Forrest Gump (1994)", "poster": "https://m.media-amazon.com/images/I/61xFddgET-L._AC_SY741_.jpg", "rating": "8.8", "genres": "Drama, Romance"},
-                {"title": "The Pursuit of Happyness (2006)", "poster": "https://m.media-amazon.com/images/I/71U42DXSxPL._AC_SY679_.jpg", "rating": "8.0", "genres": "Biography, Drama"},
-                {"title": "Zindagi Na Milegi Dobara (2011)", "poster": "https://m.media-amazon.com/images/I/71Q1Iu4su9L._AC_SY679_.jpg", "rating": "8.2", "genres": "Adventure, Comedy, Drama"},
-                {"title": "Coco (2017)", "poster": "https://m.media-amazon.com/images/I/81cgG2YZ3JL._AC_SY679_.jpg", "rating": "8.4", "genres": "Animation, Adventure, Family"},
-                {"title": "The Good Place (Series, 2016–2020)", "poster": "https://m.media-amazon.com/images/I/71pQYp9GhFL._AC_SY679_.jpg", "rating": "8.2", "genres": "Comedy, Fantasy"}
-            ],
+def fetch_recommendations(category):
+    query_map = {
+        "positive": "feel+good",
+        "negative": "sad+emotional+dark",
+        "neutral": "mind+bending+intelligent"
+    }
 
-            "negative": [
-                {"title": "Joker (2019)", "poster": "https://m.media-amazon.com/images/I/71xYLsRzJ-L._AC_SY679_.jpg", "rating": "8.4", "genres": "Crime, Drama, Thriller"},
-                {"title": "Requiem for a Dream (2000)", "poster": "https://m.media-amazon.com/images/I/71UgHTA+3zL._AC_SY679_.jpg", "rating": "8.3", "genres": "Drama"},
-                {"title": "Manchester by the Sea (2016)", "poster": "https://m.media-amazon.com/images/I/71AqOD7LYXL._AC_SY679_.jpg", "rating": "7.8", "genres": "Drama"},
-                {"title": "The Whale (2022)", "poster": "https://m.media-amazon.com/images/I/81rE5c8uXwL._AC_SY679_.jpg", "rating": "7.7", "genres": "Drama"},
-                {"title": "BoJack Horseman (Series, 2014–2020)", "poster": "https://m.media-amazon.com/images/I/81Z0g3UkH2L._AC_SY679_.jpg", "rating": "8.8", "genres": "Animation, Comedy, Drama"},
-                {"title": "Eternal Sunshine of the Spotless Mind (2004)", "poster": "https://m.media-amazon.com/images/I/71U9SN7VrYL._AC_SY679_.jpg", "rating": "8.3", "genres": "Drama, Romance, Sci-Fi"}
-            ],
+    query = query_map.get(category, "mind+bending")
+    api_key = st.secrets["TMDB_API_KEY"]
 
-            "neutral": [
-                {"title": "Inception (2010)", "poster": "https://m.media-amazon.com/images/I/71Hmy8vTOJL._AC_SY679_.jpg", "rating": "8.8", "genres": "Action, Sci-Fi, Thriller"},
-                {"title": "The Matrix (1999)", "poster": "https://m.media-amazon.com/images/I/51EG732BV3L.jpg", "rating": "8.7", "genres": "Action, Sci-Fi"},
-                {"title": "Her (2013)", "poster": "https://m.media-amazon.com/images/I/71o9i5-2C5L._AC_SY679_.jpg", "rating": "8.0", "genres": "Drama, Romance, Sci-Fi"},
-                {"title": "Black Mirror (Series, 2011– )", "poster": "https://m.media-amazon.com/images/I/81TZ5MMEZeL._AC_SY679_.jpg", "rating": "8.8", "genres": "Drama, Sci-Fi, Thriller"},
-                {"title": "Tenet (2020)", "poster": "https://m.media-amazon.com/images/I/71tV4GN28uL._AC_SY679_.jpg", "rating": "7.3", "genres": "Action, Sci-Fi, Thriller"},
-                {"title": "The Prestige (2006)", "poster": "https://m.media-amazon.com/images/I/71yRk7P3tJL._AC_SY679_.jpg", "rating": "8.5", "genres": "Drama, Mystery, Thriller"}
-            ]
-        }
+    url = f"https://api.themoviedb.org/3/search/multi?api_key={api_key}&query={query}&language=en-US"
+    response = requests.get(url).json()
 
-        items = recommendations.get(sentiment.lower(), recommendations["neutral"])
+    results = response.get("results", [])[:16]  # Top 16 items
 
-        cols = st.columns(4)
-        for i, m in enumerate(items):
-            with cols[i % 4]:
-                st.image(m["poster"], use_column_width=True)
-                st.markdown(f"**{m['title']}**")
-                st.write(f"⭐ Rating: {m['rating']}")
-                st.write(f"🎭 Genres: {m['genres']}")
+    final_items = []
+    for item in results:
+        title = item.get("title") or item.get("name")
+        poster_path = item.get("poster_path")
+        poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+        rating = item.get("vote_average", "N/A")
+        release_date = item.get("release_date") or item.get("first_air_date") or "N/A"
+        year = release_date.split("-")[0]
+        media_type = item.get("media_type", "").capitalize()
+
+        # Fetch genre names (optional but looks premium)
+        genre_url = f"https://api.themoviedb.org/3/{item['media_type']}/{item['id']}?api_key={api_key}&language=en-US"
+        genre_res = requests.get(genre_url).json()
+        genres = ", ".join([g["name"] for g in genre_res.get("genres", [])])
+
+        final_items.append({
+            "title": f"{title} ({year}) [{media_type}]",
+            "poster": poster,
+            "rating": round(rating,2),
+            "genres": genres
+        })
+
+    return final_items
+
+
+# Display Recommendations Section
+st.subheader("🍿 Movie & TV Show Recommendations For You")
+
+items = fetch_recommendations(sentiment.lower())
+
+cols = st.columns(4)
+for i, m in enumerate(items):
+    with cols[i % 4]:
+        if m["poster"]:
+            st.image(m["poster"], use_column_width=True)
+        st.markdown(f"**{m['title']}**")
+        st.write(f"⭐ Rating: {m['rating']}")
+        st.write(f"🎭 Genres: {m['genres']}")
+
 
 # ---------- WordCloud ----------
 st.subheader("🌈 WordCloud of Positive vs Negative Reviews")
