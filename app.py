@@ -75,6 +75,10 @@ nltk.download('brown')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('conll2000')
 
+# ---------- TextBlob Required Corpus ----------
+import textblob
+from textblob import download_corpora
+download_corpora()
 # ---------- Title ----------
 st.title("🎬 IMDb Movie Review - NLP Sentiment & Emotion Analyzer")
 st.write("Analyze any movie review — get its **sentiment**, **dominant emotion**, and personalized **movie recommendations**!")
