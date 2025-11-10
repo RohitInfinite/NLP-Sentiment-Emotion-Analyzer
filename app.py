@@ -146,7 +146,11 @@ if st.button("Analyze Review"):
                 title = item.get("title") or item.get("name")
                 poster_path = item.get("poster_path")
                 poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
-                rating = item.get("vote_average", "N/A")
+                rating = item.get("vote_average", None)
+                try:
+                    rating = round(float(rating), 1)
+                except:
+                    rating = "N/A"
                 release_date = item.get("release_date") or item.get("first_air_date") or "N/A"
                 year = release_date.split("-")[0]
                 media_type = item.get("media_type", "").capitalize()
@@ -159,7 +163,7 @@ if st.button("Analyze Review"):
                 final_items.append({
                     "title": f"{title} ({year}) [{media_type}]",
                     "poster": poster,
-                    "rating": round(rating,2),
+                    "rating": rating,
                     "genres": genres
                 })
 
