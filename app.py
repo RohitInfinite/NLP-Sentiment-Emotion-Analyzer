@@ -67,7 +67,11 @@ set_bg("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")
 st.set_page_config(page_title="Sentiment & Emotion Analyzer")
 
 # ---------- NLTK Downloads ----------
+# ---------- NLTK Downloads ----------
 nltk.download('punkt', quiet=True)
+nltk.download('wordnet', quiet=True)
+nltk.download('brown', quiet=True)
+nltk.download('averaged_perceptron_tagger', quiet=True)
 
 # ---------- Title ----------
 st.title("🎬 IMDb Movie Review - NLP Sentiment & Emotion Analyzer")
