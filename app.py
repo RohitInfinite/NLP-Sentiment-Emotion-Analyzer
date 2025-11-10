@@ -123,60 +123,59 @@ if st.button("Analyze Review"):
         # 🎬 Movie & TV Show Recommendations (Premium curated list)
         # ================================
         import requests
+        def fetch_recommendations(category):
+            query_map = {
+                "positive": "feel+good",
+                "negative": "sad+emotional+dark",
+                "neutral": "mind+bending+intelligent"
+            }
 
-def fetch_recommendations(category):
-    query_map = {
-        "positive": "feel+good",
-        "negative": "sad+emotional+dark",
-        "neutral": "mind+bending+intelligent"
-    }
+            query = query_map.get(category, "mind+bending")
+            api_key = st.secrets["TMDB_API_KEY"]
 
-    query = query_map.get(category, "mind+bending")
-    api_key = st.secrets["TMDB_API_KEY"]
+            url = f"https://api.themoviedb.org/3/search/multi?api_key={api_key}&query={query}&language=en-US"
+            response = requests.get(url).json()
 
-    url = f"https://api.themoviedb.org/3/search/multi?api_key={api_key}&query={query}&language=en-US"
-    response = requests.get(url).json()
+            results = response.get("results", [])[:16]  # Top 16 items
 
-    results = response.get("results", [])[:16]  # Top 16 items
+            final_items = []
+            for item in results:
+                title = item.get("title") or item.get("name")
+                poster_path = item.get("poster_path")
+                poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
+                rating = item.get("vote_average", "N/A")
+                release_date = item.get("release_date") or item.get("first_air_date") or "N/A"
+                year = release_date.split("-")[0]
+                media_type = item.get("media_type", "").capitalize()
 
-    final_items = []
-    for item in results:
-        title = item.get("title") or item.get("name")
-        poster_path = item.get("poster_path")
-        poster = f"https://image.tmdb.org/t/p/w500{poster_path}" if poster_path else None
-        rating = item.get("vote_average", "N/A")
-        release_date = item.get("release_date") or item.get("first_air_date") or "N/A"
-        year = release_date.split("-")[0]
-        media_type = item.get("media_type", "").capitalize()
+                # Fetch genre names (optional but looks premium)
+                genre_url = f"https://api.themoviedb.org/3/{item['media_type']}/{item['id']}?api_key={api_key}&language=en-US"
+                genre_res = requests.get(genre_url).json()
+                genres = ", ".join([g["name"] for g in genre_res.get("genres", [])])
 
-        # Fetch genre names (optional but looks premium)
-        genre_url = f"https://api.themoviedb.org/3/{item['media_type']}/{item['id']}?api_key={api_key}&language=en-US"
-        genre_res = requests.get(genre_url).json()
-        genres = ", ".join([g["name"] for g in genre_res.get("genres", [])])
+                final_items.append({
+                    "title": f"{title} ({year}) [{media_type}]",
+                    "poster": poster,
+                    "rating": round(rating,2),
+                    "genres": genres
+                })
 
-        final_items.append({
-            "title": f"{title} ({year}) [{media_type}]",
-            "poster": poster,
-            "rating": round(rating,2),
-            "genres": genres
-        })
-
-    return final_items
+            return final_items
 
 
-# Display Recommendations Section
-st.subheader("🍿 Movie & TV Show Recommendations For You")
+        # Display Recommendations Section
+        st.subheader("🍿 Movie & TV Show Recommendations For You")
 
-items = fetch_recommendations(sentiment.lower())
+        items = fetch_recommendations(sentiment.lower())
 
-cols = st.columns(4)
-for i, m in enumerate(items):
-    with cols[i % 4]:
-        if m["poster"]:
-            st.image(m["poster"], use_column_width=True)
-        st.markdown(f"**{m['title']}**")
-        st.write(f"⭐ Rating: {m['rating']}")
-        st.write(f"🎭 Genres: {m['genres']}")
+        cols = st.columns(4)
+        for i, m in enumerate(items):
+            with cols[i % 4]:
+                if m["poster"]:
+                    st.image(m["poster"], use_column_width=True)
+                st.markdown(f"**{m['title']}**")
+                st.write(f"⭐ Rating: {m['rating']}")
+                st.write(f"🎭 Genres: {m['genres']}")
 
 
 # ---------- WordCloud ----------
