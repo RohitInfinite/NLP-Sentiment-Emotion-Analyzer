@@ -118,14 +118,53 @@ if st.button("Analyze Review"):
             emo_df = pd.DataFrame(scores.items(), columns=["Emotion", "Score"]).sort_values("Score", ascending=False)
             st.bar_chart(emo_df.set_index("Emotion"))
 
-        st.subheader("🍿 Movie Recommendations for You")
-        movie_list = {
-            "positive": ["Interstellar", "Coco", "3 Idiots", "La La Land", "Zindagi Na Milegi Dobara"],
-            "negative": ["Joker", "Fight Club", "The Whale", "Requiem for a Dream"],
-            "neutral": ["Inception", "Arrival", "The Matrix", "Her", "Tenet"]
+                # ================================
+        import requests
+
+        st.subheader("🍿 Movie Recommendations Based on Your Mood")
+
+        TMDB_API_KEY = st.secrets["TMDB_API_KEY"]
+
+        # Sentiment → keyword mapping
+        query_map = {
+            "positive": "feel good",
+            "negative": "emotional drama",
+            "neutral": "thought provoking"
         }
-        for m in movie_list.get(sentiment, movie_list["neutral"]):
-            st.write("🎞️", m)
+
+        query = query_map.get(sentiment.lower(), "movie")
+
+        # Search movies from TMDB
+        search_url = f"https://api.themoviedb.org/3/search/movie?api_key={TMDB_API_KEY}&query={query}"
+        response = requests.get(search_url).json()
+        movies = response.get("results", [])[:8]  # take top 8 movies
+
+        if not movies:
+            st.write("No recommendations available right now 😅")
+        else:
+            cols = st.columns(4)
+            for i, movie in enumerate(movies):
+                with cols[i % 4]:
+
+                    poster = movie.get("poster_path")
+                    poster_url = f"https://image.tmdb.org/t/p/w500{poster}" if poster else None
+
+                    title = movie.get("title", "Unknown Title")
+                    year = movie.get("release_date", "")[:4]
+                    rating = movie.get("vote_average", "N/A")
+                    movie_id = movie.get("id")
+
+                    # Fetch genres for each movie
+                    details_url = f"https://api.themoviedb.org/3/movie/{movie_id}?api_key={TMDB_API_KEY}"
+                    details = requests.get(details_url).json()
+                    genres = ", ".join([g['name'] for g in details.get("genres", [])])
+
+                    if poster_url:
+                        st.image(poster_url, use_column_width=True)
+
+                    st.markdown(f"**{title} ({year})**")
+                    st.markdown(f"⭐ **Rating:** {rating}")
+                    st.markdown(f"🎭 **Genres:** {genres}")
 
 
 # ---------- WordCloud ----------
