@@ -8,4 +8,3 @@ textblob
 nrclex
 nltk
 gdown
-requests
