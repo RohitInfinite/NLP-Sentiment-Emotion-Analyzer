@@ -22,13 +22,15 @@ import nltk
 
 import base64
 
-# Function to set custom background
+# Function to set custom background with a frosted-glass overlay
 def set_background(image_file):
     with open(image_file, "rb") as f:
         data = f.read()
     b64 = base64.b64encode(data).decode()
+
     css = f"""
     <style>
+    /* Background image */
     .stApp {{
         background-image: url("data:image/jpg;base64,{b64}");
         background-size: cover;
@@ -36,18 +38,45 @@ def set_background(image_file):
         background-repeat: no-repeat;
         background-attachment: fixed;
     }}
-    /* Add a light dark overlay for better text visibility */
-    .stApp > .main {{
-        background-color: rgba(0,0,0,0.45);
-        padding: 1rem;
+
+    /* Frosted glass container for content */
+    .main-block {{
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1rem auto;
+        max-width: 900px;
+        box-shadow: 0 4px 25px rgba(0,0,0,0.3);
+        color: white;
+    }}
+
+    /* Headings and text styling */
+    h1, h2, h3, p, label {{
+        color: #ffffff !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }}
+
+    /* Buttons */
+    button[kind="primary"] {{
+        background-color: #ff4b4b;
         border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        transition: 0.3s;
+    }}
+    button[kind="primary"]:hover {{
+        background-color: #ff7878;
     }}
     </style>
     """
     st.markdown(css, unsafe_allow_html=True)
+    st.markdown('<div class="main-block">', unsafe_allow_html=True)
 
-# Call the function (make sure filename matches exactly)
+# Call the function (make sure image name matches exactly)
 set_background("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")
+st.markdown("</div>", unsafe_allow_html=True)
 
 # Download necessary NLTK data (only once)
 nltk.download('punkt')
