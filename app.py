@@ -89,6 +89,26 @@ nltk.download('punkt', quiet=True)
 # Page Setup
 # ================================
 st.set_page_config(page_title="Sentiment & Emotion Analyzer", layout="centered")
+# Create a glass-effect container for all content
+st.markdown("""
+    <style>
+    .glass-box {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border-radius: 20px;
+        padding: 30px;
+        margin-top: 40px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+    h1, h2, h3, p {
+        color: white !important;
+    }
+    </style>
+    <div class="glass-box">
+""", unsafe_allow_html=True)
+
+# Main content inside glass box
 st.title("🎬 IMDb Movie Review - NLP Sentiment & Emotion Analyzer")
 st.write("Analyze any movie review — get its **sentiment**, **dominant emotion**, and **visual insights**!")
 
@@ -213,3 +233,4 @@ axes[1].set_title('Negative Reviews')
 axes[1].axis('off')
 
 st.pyplot(fig)
+st.markdown("</div>", unsafe_allow_html=True)
