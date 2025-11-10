@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 from nrclex import NRCLex
+from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from wordcloud import WordCloud
@@ -66,19 +67,6 @@ set_bg("samuel-regan-asante-wMkaMXTJjlQ-unsplash.jpg")
 # ---------- Streamlit Page Config ----------
 st.set_page_config(page_title="Sentiment & Emotion Analyzer")
 
-# ---------- NLTK Downloads ----------
-# ---------- NLTK Downloads ----------
-# ---------- NLTK Downloads ----------
-nltk.download('punkt')
-nltk.download('wordnet')
-nltk.download('brown')
-nltk.download('averaged_perceptron_tagger')
-nltk.download('conll2000')
-
-# ---------- TextBlob Required Corpus ----------
-import textblob
-from textblob import download_corpora
-download_corpora()
 # ---------- Title ----------
 st.title("🎬 IMDb Movie Review - NLP Sentiment & Emotion Analyzer")
 st.write("Analyze any movie review — get its **sentiment**, **dominant emotion**, and personalized **movie recommendations**!")
@@ -110,7 +98,9 @@ if st.button("Analyze Review"):
         user_vector = tfidf.transform([review])
         sentiment = model.predict(user_vector)[0]
 
-        emo = NRCLex(review)
+        tokens = word_tokenize(review)
+        clean_text = " ".join(tokens)
+        emo = NRCLex(clean_text)
         scores = emo.raw_emotion_scores
         dominant = max(scores.items(), key=lambda x: x[1])[0] if scores else "neutral"
 
