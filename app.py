@@ -103,9 +103,22 @@ if st.button("Analyze Review"):
         
         tokens = word_tokenize(review)
         clean_text = " ".join(tokens)
-        emo = NRCLex(clean_text)
+        emo = NRCLex(review)
         scores = emo.raw_emotion_scores
-        dominant = max(scores.items(), key=lambda x: x[1])[0] if scores else "neutral"
+
+        # --- Neutral Detection Logic ---
+        total = sum(scores.values())
+        if total == 0:
+            dominant = "Neutral"
+        else:
+            # Normalize scores
+            percentages = {emotion: (count / total) for emotion, count in scores.items()}
+
+            # If no emotion strongly dominates -> Neutral
+            if max(percentages.values()) < 0.35:
+                dominant = "Neutral"
+            else:
+                dominant = max(percentages.items(), key=lambda x: x[1])[0]
 
         st.subheader("🧠 Analysis Result")
         st.write(f"**Sentiment:** {sentiment.capitalize()}")
