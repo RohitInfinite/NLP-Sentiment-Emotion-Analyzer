@@ -96,7 +96,16 @@ if st.button("Analyze Review"):
         st.warning("⚠️ Please type a review first!")
     else:
         user_vector = tfidf.transform([review])
-        sentiment = model.predict(user_vector)[0]
+        # Get sentiment probabilities
+        proba = model.predict_proba(user_vector)[0]
+        pos_score = proba[list(model.classes_).index("positive")]
+        neg_score = proba[list(model.classes_).index("negative")]
+
+        # Neutral threshold check
+        if abs(pos_score - neg_score) < 0.15:
+            sentiment = "neutral"
+        else:
+            sentiment = model.predict(user_vector)[0]
         
         nltk.download('punkt')
         nltk.download('punkt_tab')
