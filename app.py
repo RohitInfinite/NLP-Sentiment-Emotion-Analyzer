@@ -68,10 +68,12 @@ st.set_page_config(page_title="Sentiment & Emotion Analyzer")
 
 # ---------- NLTK Downloads ----------
 # ---------- NLTK Downloads ----------
-nltk.download('punkt', quiet=True)
-nltk.download('wordnet', quiet=True)
-nltk.download('brown', quiet=True)
-nltk.download('averaged_perceptron_tagger', quiet=True)
+# ---------- NLTK Downloads ----------
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('brown')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('conll2000')
 
 # ---------- Title ----------
 st.title("🎬 IMDb Movie Review - NLP Sentiment & Emotion Analyzer")
